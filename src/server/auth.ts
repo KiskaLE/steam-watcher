@@ -6,7 +6,7 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from 'bcrypt';
+import { validate } from "~/app/lib/authentication";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -56,20 +56,12 @@ export const authOptions: NextAuthOptions = {
       // e.g. domain, username, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
-        const user = await db.user.findUnique({
-          where: {
-            email: credentials?.email
-          }
-        })
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        if (user && await bcrypt.compare(credentials?.password ?? "", user.password)) {
-          return user
-        }
-        return null
+        if (!credentials) return null;
+        return await validate(credentials.email, credentials.password);
       }
     })
   ],
