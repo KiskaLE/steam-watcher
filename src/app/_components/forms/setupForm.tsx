@@ -68,7 +68,7 @@ export default function SetupForm() {
         e.stopPropagation();
         void setupForm.handleSubmit();
       }}
-      method="post"
+      method="POST"
       className="flex w-[300px] flex-col gap-2"
     >
       <setupForm.Field

@@ -5,9 +5,9 @@ type FieldProps = {
   id: string;
   name: string;
   type: InputHTMLAttributes<HTMLInputElement>["type"];
-  value: InputHTMLAttributes<HTMLInputElement>["value"];
-  onChange: InputHTMLAttributes<HTMLInputElement>["onChange"];
-  onBlur: InputHTMLAttributes<HTMLInputElement>["onBlur"];
+  value?: InputHTMLAttributes<HTMLInputElement>["value"];
+  onChange?: InputHTMLAttributes<HTMLInputElement>["onChange"];
+  onBlur?: InputHTMLAttributes<HTMLInputElement>["onBlur"];
   label?: string;
   errorMessage?: string;
 };

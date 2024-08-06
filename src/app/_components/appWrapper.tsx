@@ -1,6 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
-import { getServerAuthSession } from "~/server/auth";
+import { validateRequest } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 export default async function AppWrapper({
@@ -8,13 +8,13 @@ export default async function AppWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerAuthSession();
+  const { session } = await validateRequest();
   if (await api.user.noUsers()) {
     redirect("/setup");
   }
 
   if (!session) {
-    redirect("/api/auth/signin");
+    redirect("/login");
   }
   return <>{children}</>;
 }
