@@ -1,34 +1,11 @@
-import { z } from "zod";
+"use server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { lucia } from "~/server/auth";
 import bcrypt from "bcrypt";
 
 
-export default async function login(formData: FormData) {
-    "use server";
-
-    const email = formData.get("email")?.toString();
-    if (
-        !email ||
-        !z
-            .string()
-            .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)
-            .parse(email)
-    ) {
-        return {
-            error: "Invalid email format",
-        };
-    }
-
-    const password = formData.get("password")?.toString();
-    if (!password || !z.string().min(1).parse(password)) {
-        return {
-            error: "Invalid password format",
-        };
-    }
-
+export default async function login(email: string, password: string) {
     const user = await db.user.findUnique({
         where: {
             email: email,
@@ -36,16 +13,12 @@ export default async function login(formData: FormData) {
     });
 
     if (!user) {
-        return {
-            error: "Incorrect username or password",
-        };
+        return false
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-        return {
-            error: "Incorrect username or password",
-        };
+        return false
     }
     const session = await lucia.createSession(user.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
@@ -54,5 +27,5 @@ export default async function login(formData: FormData) {
         sessionCookie.value,
         sessionCookie.attributes,
     );
-    return redirect("/");
+    return true;
 }
