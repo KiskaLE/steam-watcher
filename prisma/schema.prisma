@@ -42,3 +42,22 @@ model User {
     sessions Session[]
     posts    Post[]
 }
+
+model Game {
+    id         String      @id @default(cuid())
+    appId      Int
+    name       String
+    releaseDay DateTime
+    publisher  String
+    storeUrl   String
+    price      GamePrice[]
+}
+
+model GamePrice {
+    id        String   @id @default(cuid())
+    Game      Game     @relation(fields: [gameId], references: [id])
+    gameId    String
+    price     Int
+    currency  String
+    createdAt DateTime @default(now())
+}

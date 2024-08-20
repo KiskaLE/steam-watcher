@@ -2,6 +2,7 @@ import { unknown, z } from "zod";
 import {
     createTRPCRouter,
     protectedProcedure,
+    publicProcedure,
 } from "~/server/api/trpc";
 
 type AboutStats = {
@@ -33,14 +34,16 @@ export const steamRouter = createTRPCRouter({
         }
         return await response.json() as AboutStats;
     }),
-    getAppDetails: protectedProcedure.input(z.object({ appIds: z.string().array().nonempty("App IDs are required") })).query(async ({ input }) => {
-        const response = await fetch(`${valveEndpoint}/api/appdetails?appids=${input.appIds.join(",")}&filters=price_overview`);
+    getAppDetails: publicProcedure.input(z.object({ appIds: z.string().array().nonempty("App IDs are required") })).query(async ({ input }) => {
+        const response = await fetch(`${storeEndpoint}/api/appdetails?appids=${input.appIds.join(",")}&filters=price_overview`);
         if (!response.ok) {
             throw new Error("Failed to fetch app details");
         }
         const data = await response.json();
+        console.log(data);
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-        const priceOverviews = data?.map((app: any) => app?.data?.price_overview) as AppData[];
-        return priceOverviews;
+        //const priceOverviews = data?.map((app: any) => app?.data?.price_overview) as AppData[];
+        return null;
     })
 });
