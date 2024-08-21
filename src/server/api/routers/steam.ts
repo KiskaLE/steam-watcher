@@ -36,7 +36,7 @@ export const steamRouter = createTRPCRouter({
         }
         return await response.json() as AboutStats;
     }),
-    getAppDetails: publicProcedure.input(z.object({ appIds: z.number() })).query(async ({ input }) => {
+    getAppDetails: publicProcedure.input(z.object({ appIds: z.number().array() })).query(async ({ input }) => {
         const myHeaders = new Headers();
         myHeaders.append("Cookie", "steamCountry=CZ%7C707c3774fc362c731377662082b5d333");
         myHeaders.append("filters", "price_overview");
@@ -44,7 +44,7 @@ export const steamRouter = createTRPCRouter({
             method: 'GET',
             headers: myHeaders
         }
-        const response = await fetch(`${storeEndpoint}/api/appdetails?appids=${input.appIds}&filters=price_overview`, requestOptions);
+        const response = await fetch(`${storeEndpoint}/api/appdetails?appids=${input.appIds.join(",")}&filters=price_overview`, requestOptions);
         if (!response.ok) {
             throw new Error("Failed to fetch app details");
         }

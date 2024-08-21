@@ -37,7 +37,7 @@ async function checkGames() {
             return new Response("OK", { status: 200 });
         }
         // get app details
-        const res = await api.steam.getAppDetails({ appIds: appsIds[0] ?? 0 });
+        const res = await api.steam.getAppDetails({ appIds: appsIds });
         // eslint-disable-next-line @typescript-eslint/no-for-in-array
         for (const key in res) {
             if (res.hasOwnProperty(key)) {
