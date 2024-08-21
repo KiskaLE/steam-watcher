@@ -1,4 +1,4 @@
-import { unknown, z } from "zod";
+import { z } from "zod";
 import {
     createTRPCRouter,
     protectedProcedure,
@@ -10,20 +10,22 @@ type AboutStats = {
     users_ingame: number
 }
 
-type AppData = {
-    price_overview: {
-        currency: string;
-        initial: number;
-        final: number;
-        discount_percent: number;
-        initial_formatted: string;
-        final_formatted: string;
+export type AppData = {
+    success: boolean;
+    data: {
+        price_overview: {
+            currency: string;
+            initial: number;
+            final: number;
+            discount_percent: number;
+            initial_formatted: string;
+            final_formatted: string;
+        }
     }
 
 }
 
 const valveEndpoint = "https://www.valvesoftware.com"
-const steamEndpoint = "https://api.steampowered.com"
 const storeEndpoint = "https://store.steampowered.com"
 
 export const steamRouter = createTRPCRouter({
@@ -34,16 +36,20 @@ export const steamRouter = createTRPCRouter({
         }
         return await response.json() as AboutStats;
     }),
-    getAppDetails: publicProcedure.input(z.object({ appIds: z.string().array().nonempty("App IDs are required") })).query(async ({ input }) => {
-        const response = await fetch(`${storeEndpoint}/api/appdetails?appids=${input.appIds.join(",")}&filters=price_overview`);
+    getAppDetails: publicProcedure.input(z.object({ appIds: z.number() })).query(async ({ input }) => {
+        const myHeaders = new Headers();
+        myHeaders.append("Cookie", "steamCountry=CZ%7C707c3774fc362c731377662082b5d333");
+        myHeaders.append("filters", "price_overview");
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders
+        }
+        const response = await fetch(`${storeEndpoint}/api/appdetails?appids=${input.appIds}&filters=price_overview`, requestOptions);
         if (!response.ok) {
             throw new Error("Failed to fetch app details");
         }
-        const data = await response.json();
-        console.log(data);
+        const res = await response.json();
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-        //const priceOverviews = data?.map((app: any) => app?.data?.price_overview) as AppData[];
-        return null;
+        return res as Promise<AppData[]>;
     })
 });
